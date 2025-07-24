@@ -4,6 +4,7 @@ target-archs = "70-real;80-real;90-real"
 
 [python]
 preload-library = [
+    { "group" = "faiss", "package" = "faiss-gpu-cu12", "library" = "libfaiss.so" },
     { "group" = "cuda", "package" = "nvidia-cuda-runtime-cu12", "library" = "libcudart.so.12" },
     { "group" = "cuda", "package" = "nvidia-cublas-cu12", "library" = "libcublas.so.12" },
     { "group" = "cuda", "package" = "nvidia-cublas-cu12", "library" = "libcublasLt.so.12" },

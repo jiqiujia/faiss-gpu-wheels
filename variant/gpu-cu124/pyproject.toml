@@ -9,7 +9,7 @@ requires = ["scikit-build-core", "swig", "oldest-supported-numpy"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "faiss-gpu-cu124"
+name = "faiss-gpu-cu12"
 version = "1.11.0"
 dependencies = [
     "numpy<2",
@@ -65,7 +65,7 @@ index = "torch-index"
 
 [tool.scikit-build.cmake]
 source-dir = "../../"
-args = ["-DBUILD_SHARED_LIBS=ON", "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_TESTING=OFF"]
+args = ["-DBUILD_SHARED_LIBS=ON", "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_TESTING=OFF", "-DFAISS_ENABLE_GPU=ON"]
 
 [tool.scikit-build.cmake.define.FAISS_OPT_LEVEL]
 env = "FAISS_OPT_LEVEL"
@@ -79,6 +79,9 @@ env = "FAISS_ENABLE_ROCM"
 [tool.scikit-build.cmake.define.FAISS_ENABLE_RAFT]
 env = "FAISS_ENABLE_RAFT"
 
+[tool.scikit-build.cmake.define.CMAKE_CUDA_ARCHITECTURES]
+env = "CUDA_ARCHITECTURES"
+
 [tool.scikit-build.wheel]
 exclude = ["*.cxx"]
 
@@ -89,7 +92,7 @@ skip = "pp* *-musllinux* *i686"
 [tool.cibuildwheel.linux]
 before-all = "CUDA_VERSION=\"12.4\" script/build.sh"
 environment-pass = ["NJOB", "FAISS_OPT_LEVEL", "CUDA_ARCHITECTURES"]
-before-test = "uv sync --project variant/gpu-cu124 --no-install-project --active"
+before-test = "uv sync --project variant/gpu-cu12 --no-install-project --active"
 test-extras = ["fix-cuda"]
 repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel} --exclude libcudart.so.12 --exclude libcublas.so.12 --exclude libcublasLt.so.12"
 test-command = "\n# CPU Test\npytest {project}/faiss/tests/ -n $((`nproc --all`/5+1)) &&\npytest {project}/faiss/tests/torch_test_contrib.py -n $((`nproc --all`/5+1)) &&\n# GPU Test\npytest {project}/faiss/tests/common_faiss_tests.py {project}/faiss/faiss/gpu/test/ &&\npytest {project}/faiss/faiss/gpu/test/torch_test_contrib_gpu.py\n"
