@@ -1,10 +1,18 @@
 cmake_minimum_required(VERSION 3.15...3.26)
-project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX)
+project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX VERSION ${SKBUILD_PROJECT_VERSION})
 
+message(STATUS "SKBUILD_PROJECT_VERSION: ${SKBUILD_PROJECT_VERSION}")  # 应输出 1.11.0
+message(STATUS "CMAKE_PROJECT_VERSION: ${CMAKE_PROJECT_VERSION}")      # 应输出 1.11.0
+message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
+message(STATUS "faiss_SOURCE_DIR: ${faiss_SOURCE_DIR}")
+
+set(faiss_SOURCE_DIR ${PROJECT_SOURCE_DIR}/faiss)
 set(CMAKE_SWIG_OUTDIR ${SKBUILD_PLATLIB_DIR}/faiss)
 
+add_subdirectory(faiss/faiss) # 核心库目录，定义了 add_library(faiss ...)
 add_subdirectory(faiss/faiss/python)
 
+install(TARGETS faiss DESTINATION faiss)  # 新增此行，安装 libfaiss.so
 install(TARGETS swigfaiss DESTINATION faiss)
 
 if(FAISS_OPT_LEVEL STREQUAL "avx2")
