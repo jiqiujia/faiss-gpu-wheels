@@ -5,10 +5,11 @@ on:
   pull_request:
   release:
     types: [published]
+  workflow_dispatch:
   
 env:
   FAISS_OPT_LEVEL: "generic"
-  CUDA_ARCHITECTURES: "70-real;80-real"
+  CUDA_ARCHITECTURES: "70-real;80-real;90-real"
   
 jobs:
   build-wheel:
@@ -17,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: ["gpu-cu11", "gpu-cu12"]
+        variant: ["gpu-cu11", "gpu-cu12", "gpu-cu124"]
     steps:
       - uses: actions/checkout@v4
         with:

@@ -1,0 +1,15 @@
+[cuda]
+version = "12.4"
+target-archs = "70-real;80-real;90-real"
+
+[python]
+preload-library = [
+    { "group" = "cuda", "package" = "nvidia-cuda-runtime-cu12", "library" = "libcudart.so.12" },
+    { "group" = "cuda", "package" = "nvidia-cublas-cu12", "library" = "libcublas.so.12" },
+    { "group" = "cuda", "package" = "nvidia-cublas-cu12", "library" = "libcublasLt.so.12" },
+]
+
+[test]
+# torch 2.7.0 is not compatible with python 3.9
+dependencies = ["pytest", "pytest-xdist", "scipy", "torch<2.7.0"]
+index-url = "https://download.pytorch.org/whl/cu124"

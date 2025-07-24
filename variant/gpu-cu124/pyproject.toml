@@ -1,0 +1,100 @@
+# Copyright (c) 2024 Di-Is
+#
+# This software is released under the MIT License.
+# http://opensource.org/licenses/mit-license.php
+#
+# This file is created by the `generate_pyproject.py`.
+[build-system]
+requires = ["scikit-build-core", "swig", "oldest-supported-numpy"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "faiss-gpu-cu124"
+version = "1.11.0"
+dependencies = [
+    "numpy<2",
+    "packaging",
+    "nvidia-cuda-runtime-cu12>=12.4.127",
+    "nvidia-cublas-cu12>=12.4.5.8",
+]
+requires-python = ">=3.9,<3.13"
+authors = [{ name = "Di-Is", email = "rhoxbox@gmail.com" }]
+description = "A library for efficient similarity search and clustering of dense vectors."
+readme = "../../README.md"
+keywords = ["search nearest neighbors"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Environment :: GPU :: NVIDIA CUDA",
+    "Environment :: GPU :: NVIDIA CUDA :: 12",
+]
+
+[project.license]
+file = "../../LICENSE"
+
+[project.urls]
+faiss-gpu-wheels = "https://github.com/Di-Is/faiss-gpu-wheels"
+
+[project.optional-dependencies]
+fix-cuda = [
+    "nvidia-cuda-runtime-cu12==12.4.127",
+    "nvidia-cublas-cu12==12.4.5.8",
+]
+
+[dependency-groups]
+dev = ["pytest", "pytest-xdist", "scipy", "torch<2.7.0"]
+
+[tool.uv]
+index = [
+    { name = "torch-index", url = "https://download.pytorch.org/whl/cu124", explicit = true },
+]
+
+[tool.uv.sources.torch]
+index = "torch-index"
+
+[tool.scikit-build.cmake]
+source-dir = "../../"
+
+[tool.scikit-build.cmake.define.FAISS_OPT_LEVEL]
+env = "FAISS_OPT_LEVEL"
+
+[tool.scikit-build.cmake.define.FAISS_ENABLE_GPU]
+env = "FAISS_ENABLE_GPU"
+
+[tool.scikit-build.cmake.define.FAISS_ENABLE_ROCM]
+env = "FAISS_ENABLE_ROCM"
+
+[tool.scikit-build.cmake.define.FAISS_ENABLE_RAFT]
+env = "FAISS_ENABLE_RAFT"
+
+[tool.scikit-build.wheel]
+exclude = ["*.cxx"]
+
+[tool.cibuildwheel]
+build-frontend = "build[uv]"
+skip = "pp* *-musllinux* *i686"
+
+[tool.cibuildwheel.linux]
+before-all = "CUDA_VERSION=\"12.4\" script/build.sh"
+environment-pass = ["NJOB", "FAISS_OPT_LEVEL", "CUDA_ARCHITECTURES"]
+before-test = "uv sync --project variant/gpu-cu124 --no-install-project --active"
+test-extras = ["fix-cuda"]
+repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel} --exclude libcudart.so.12 --exclude libcublas.so.12 --exclude libcublasLt.so.12"
+test-command = "\n# CPU Test\npytest {project}/faiss/tests/ -n $((`nproc --all`/5+1)) &&\npytest {project}/faiss/tests/torch_test_contrib.py -n $((`nproc --all`/5+1)) &&\n# GPU Test\npytest {project}/faiss/tests/common_faiss_tests.py {project}/faiss/faiss/gpu/test/ &&\npytest {project}/faiss/faiss/gpu/test/torch_test_contrib_gpu.py\n"
+
+[tool.cibuildwheel.linux.environment]
+UV_CACHE_DIR = "/host/tmp/.cache/uv"
+UV_LINK_MODE = "copy"
+OMP_NUM_THREADS = "1"
+FAISS_ENABLE_GPU = "ON"
