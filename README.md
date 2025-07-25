@@ -1,3 +1,34 @@
+This repository is based on [Di-Is/faiss-wheels](https://github.com/Di-Is/faiss-gpu-wheels)
+
+# Why this repository
+- The latest official `faiss-gpu` release can only be installed via Conda, limiting flexibility for non-Conda environments.
+- Existing faiss-gpu-cu12 distributions support GPUs with architectures from Volta to Ada Lovelace, but exclude newer models like H20.
+- The original repository relies on cibuildwheel with Docker, which is impractical for local-only development setups (this version streamlines local builds).
+
+# Usage
+If you have a pre-configured CUDA environment, simply clone this repository and install directly:
+```bash
+cd variant/gpu-cu124 && pip install .
+```
+
+## Handling CUDA Dependency Conflicts
+If you encounter CUDA-related dependency issues, adjust the dependencies in `variant/gpu-cu124/pyproject.toml`
+```toml
+dependencies = [
+    "numpy<2",
+    "packaging",
+    "nvidia-cuda-runtime-cu12>=12.4.127",
+    "nvidia-cublas-cu12>=12.4.5.8",
+]
+```
+## Building Redistributable Wheels
+To create a shareable wheel package:
+```
+cd variant/gpu-cu124 && python -m build --wheel --outdir ../../wheelhouse/gpu-cu124
+```
+
+---
+
 # faiss-wheels
 
 This repository is based on [kyamagu/faiss-wheels](https://github.com/kyamagu/faiss-wheels).
